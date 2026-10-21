@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PneumoAI – Chest X-ray Analysis</title>
+<meta name="description" content="PneumoAI estimates the probability of pneumonia from a chest X-ray using a ResNet50 deep learning model.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🫁</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0B1220;
+    --panel: #111C2E;
+    --line: #263449;
+    --text: #F1F5F9;
+    --muted: #94A3B8;
+    --teal: #14B8A6;
+    --red: #e53935;
+    --amber: #fbc02d;
+    --green: #43a047;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: 'Poppins', system-ui, sans-serif; line-height: 1.65;
+  }
+  a { color: var(--teal); }
+  a:focus-visible, .btn:focus-visible { outline: 3px solid var(--teal); outline-offset: 3px; }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 24px; }
+
+  header.top { padding: 22px 0; border-bottom: 1px solid var(--line); }
+  header.top .wrap { display: flex; align-items: center; gap: 14px; }
+  .logo { width: 44px; height: 44px; border-radius: 12px; background: var(--teal);
+          display: grid; place-items: center; font-size: 1.4rem; }
+  .brand { font-weight: 700; font-size: 1.25rem; }
+  header.top nav { margin-left: auto; display: flex; gap: 22px; font-size: 0.95rem; }
+  header.top nav a { color: var(--muted); text-decoration: none; }
+  header.top nav a:hover { color: var(--text); }
+
+  .hero { padding: 84px 0 64px; }
+  .hero h1 { font-size: clamp(2.2rem, 6vw, 3.8rem); line-height: 1.1; margin: 0 0 20px; font-weight: 700; max-width: 14em; }
+  .hero p.lead { color: var(--muted); font-size: 1.1rem; max-width: 36em; margin: 0 0 32px; }
+  .actions { display: flex; flex-wrap: wrap; gap: 12px; }
+  .btn { display: inline-block; padding: 13px 26px; border-radius: 12px; font-weight: 600;
+         text-decoration: none; border: 1px solid var(--line); color: var(--text); background: #1E293B; }
+  .btn.primary { background: var(--teal); border-color: var(--teal); color: var(--bg); }
+  .btn:hover { filter: brightness(1.12); }
+
+  /* the one memorable element: the result scale */
+  .scale { margin-top: 64px; background: var(--panel); border: 1px solid var(--line);
+           border-radius: 18px; padding: 28px; }
+  .scale h2 { margin: 0 0 4px; font-size: 1.1rem; }
+  .scale p { margin: 0 0 22px; color: var(--muted); font-size: 0.95rem; }
+  .track { display: flex; height: 18px; border-radius: 10px; overflow: hidden; }
+  .track span:nth-child(1) { flex: 40; background: var(--green); }
+  .track span:nth-child(2) { flex: 30; background: var(--amber); }
+  .track span:nth-child(3) { flex: 30; background: var(--red); }
+  .ticks { position: relative; height: 22px; margin-top: 8px; color: var(--muted); font-size: 0.85rem; }
+  .ticks span { position: absolute; transform: translateX(-50%); }
+  .legend { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin-top: 18px; }
+  .legend b { display: block; }
+  .legend small { color: var(--muted); font-size: 0.88rem; }
+  .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; }
+
+  section { padding: 56px 0; border-top: 1px solid var(--line); }
+  section h2 { font-size: 1.6rem; margin: 0 0 24px; }
+
+  ol.steps { list-style: none; margin: 0; padding: 0; counter-reset: s; display: grid; gap: 16px; }
+  ol.steps li { counter-increment: s; display: grid; grid-template-columns: 44px 1fr; gap: 16px; align-items: start; }
+  ol.steps li::before { content: counter(s); width: 44px; height: 44px; border-radius: 50%;
+          border: 1px solid var(--teal); color: var(--teal); display: grid; place-items: center; font-weight: 600; }
+  ol.steps b { display: block; }
+  ol.steps span { color: var(--muted); }
+
+  ul.feat { margin: 0; padding: 0; list-style: none; display: grid; gap: 12px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+  ul.feat li { padding-left: 22px; position: relative; color: #D5DEEA; }
+  ul.feat li::before { content: ""; position: absolute; left: 0; top: 0.7em; width: 8px; height: 8px;
+                       border-radius: 50%; background: var(--teal); }
+
+  .shots { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+  .shots figure { margin: 0; }
+  .shots figcaption { color: var(--muted); font-size: 0.9rem; margin-top: 8px; }
+  .shots img, .video { width: 100%; border-radius: 14px; border: 1px solid var(--line); background: var(--panel); }
+  .video { aspect-ratio: 16 / 9; display: grid; place-items: center; color: var(--muted); text-decoration: none; }
+
+  .stack { display: flex; flex-wrap: wrap; gap: 10px; }
+  .stack span { padding: 6px 16px; border-radius: 20px; background: rgba(20,184,166,0.15);
+                color: var(--teal); font-weight: 600; font-size: 0.9rem; }
+
+  .note { background: rgba(229,57,53,0.12); border: 1px solid rgba(229,57,53,0.4); color: #FCA5A5;
+          border-radius: 12px; padding: 16px 20px; }
+  footer { padding: 34px 0 44px; color: #64748B; font-size: 0.85rem; text-align: center; border-top: 1px solid var(--line); }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="logo" aria-hidden="true">🫁</div>
+    <div class="brand">PneumoAI</div>
+    <nav aria-label="Page sections">
+      <a href="#how">How it works</a>
+      <a href="#demo">Screenshots</a>
+      <a href="#tech">Tech</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <div class="hero">
+      <h1>Upload a chest X-ray. Get a pneumonia probability in seconds.</h1>
+      <p class="lead">PneumoAI uses a ResNet50 deep learning model to score a chest X-ray and flag whether a doctor should take a closer look. It is a decision-support tool, built as a college main project.</p>
+      <div class="actions">
+        <a class="btn primary" href="#demo">See screenshots</a>
+        <a class="btn" href="https://github.com/anjanaravi105/PneumoAI">View the code on GitHub</a>
+      </div>
+
+      <div class="scale">
+        <h2>How a result is graded</h2>
+        <p>The model returns one number: the probability of pneumonia.</p>
+        <div class="track" role="img" aria-label="Scale: green below 40 percent, amber 40 to 70 percent, red above 70 percent">
+          <span></span><span></span><span></span>
+        </div>
+        <div class="ticks" aria-hidden="true">
+          <span style="left:0%; transform:none;">0%</span>
+          <span style="left:40%;">40%</span>
+          <span style="left:70%;">70%</span>
+          <span style="left:100%; transform:translateX(-100%);">100%</span>
+        </div>
+        <div class="legend">
+          <div><b><span class="dot" style="background:var(--green)"></span>Normal</b><small>Below 40%. No strong signs of pneumonia.</small></div>
+          <div><b><span class="dot" style="background:var(--amber)"></span>Uncertain, needs review</b><small>40% to 70%. The model is not confident.</small></div>
+          <div><b><span class="dot" style="background:var(--red)"></span>Pneumonia detected</b><small>70% and above. Clinical review recommended.</small></div>
+        </div>
+      </div>
+    </div>
+
+    <section id="how">
+      <h2>How it works</h2>
+      <ol class="steps">
+        <li><div><b>Log in</b><span>Each user has an account with a securely hashed password.</span></div></li>
+        <li><div><b>Enter patient details</b><span>Name, age, gender and date of the scan.</span></div></li>
+        <li><div><b>Upload the X-ray</b><span>The image is resized to 224 × 224 pixels and passed to the ResNet50 model.</span></div></li>
+        <li><div><b>Read the result</b><span>A colour-coded card shows the probability. The result is saved to that user's history, where it can be searched, sorted or deleted.</span></div></li>
+      </ol>
+    </section>
+
+    <section id="features">
+      <h2>Features</h2>
+      <ul class="feat">
+        <li>Sign up and login with show / hide password</li>
+        <li>Colour-coded pneumonia probability</li>
+        <li>Personal analysis history for each user</li>
+        <li>Search history by patient name</li>
+        <li>Sort by newest or oldest</li>
+        <li>Delete individual records</li>
+        <li>Details clear automatically on logout</li>
+        <li>Dark interface that is easy on the eyes</li>
+      </ul>
+    </section>
+
+    <section id="demo">
+      <h2>Screenshots</h2>
+      <div class="shots">
+        <figure>
+          <img src="login.png" alt="PneumoAI login page with show and hide password icon" loading="lazy">
+          <figcaption>Login page, with show / hide password</figcaption>
+        </figure>
+        <figure>
+          <img src="result-normal.png" alt="Normal result shown in green with 18.1 percent probability" loading="lazy">
+          <figcaption>Normal result: low pneumonia probability</figcaption>
+        </figure>
+        <figure>
+          <img src="result-uncertain.png" alt="Uncertain result shown in amber with 52.9 percent probability" loading="lazy">
+          <figcaption>Uncertain result: the model asks for a doctor's review</figcaption>
+        </figure>
+        <figure>
+          <img src="result-infected.png" alt="Pneumonia detected result shown in red with 99.9 percent probability" loading="lazy">
+          <figcaption>Pneumonia detected: high probability, clinical review recommended</figcaption>
+        </figure>
+        <figure>
+          <img src="history.png" alt="Analysis history table with a delete button on each row" loading="lazy">
+          <figcaption>Analysis history, with a delete button on each record</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section id="tech">
+      <h2>Built with</h2>
+      <div class="stack">
+        <span>Python</span><span>TensorFlow / Keras</span><span>ResNet50</span><span>Gradio</span><span>NumPy</span><span>Pillow</span>
+      </div>
+    </section>
+
+    <section>
+      <div class="note"><b>Please note.</b> PneumoAI is for education only. Its results must not be used for real diagnosis or treatment. Always consult a qualified doctor.</div>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    PneumoAI is a group project by Anjana Ravi M, Abhinandha P Ajith and Saniya.<br>
+    College of Engineering Chengannur
+  </div>
+</footer>
+
+</body>
+</html>

@@ -324,7 +324,7 @@ def clear_all():
     return None, IDLE, "", None, None, str(date.today())
 
 # ---------- UI ----------
-with gr.Blocks(title="PneumoAI", js=APP_JS) as demo:
+with gr.Blocks(title="PneumoAI") as demo:
     gr.HTML(STYLE)
     cur_user = gr.State("")
     hist_open = gr.State(False)
@@ -403,4 +403,4 @@ with gr.Blocks(title="PneumoAI", js=APP_JS) as demo:
     sort_in.change(render_history, [search_in, sort_in, cur_user], hist_out)
     del_btn.click(delete_record, [del_id, search_in, sort_in, cur_user], hist_out)
 
-demo.launch()
+demo.launch(js=APP_JS, share=True)
