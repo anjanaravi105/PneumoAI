@@ -106,6 +106,7 @@
     <div class="brand">PneumoAI</div>
     <nav aria-label="Page sections">
       <a href="#how">How it works</a>
+      <a href="#live">Live demo</a>
       <a href="#demo">Screenshots</a>
       <a href="#tech">Tech</a>
       <a href="#team">Team</a>
@@ -167,6 +168,13 @@
       </ul>
     </section>
 
+    <section id="live">
+      <h2>Live demo</h2>
+      <p id="live-text" class="college">The live app runs from the team's laptop while we present, so the link is shared on the day.</p>
+      <a id="live-btn" class="btn primary" style="display:none" target="_blank" rel="noopener">Open the live app</a>
+      <p id="live-note" class="college" style="display:none; margin-top:14px;">If the link does not open, the demo is not running right now. The screenshots below show every screen.</p>
+    </section>
+
     <section id="demo">
       <h2>Screenshots</h2>
       <div class="shots">
@@ -205,7 +213,7 @@
       <ul class="team">
         <li>Anjana Ravi M</li>
         <li>Abhinandha P Ajith</li>
-        <li>Saniya S</li>
+        <li>Saniya</li>
       </ul>
       <p class="college">College of Engineering Chengannur</p>
     </section>
@@ -218,10 +226,24 @@
 
 <footer>
   <div class="wrap">
-    PneumoAI is a group project by Anjana Ravi M, Abhinandha P Ajith and Saniya S.<br>
+    PneumoAI is a group project by Anjana Ravi M, Abhinandha P Ajith and Saniya.<br>
     College of Engineering Chengannur
   </div>
 </footer>
+
+<script>
+  // Paste your gradio.live link between the quotes, for example "https://abc123.gradio.live"
+  // Leave it empty ("") when the app is not running.
+  var LIVE_URL = "https://6589423567501c23e9.gradio.live/";
+
+  if (LIVE_URL) {
+    var btn = document.getElementById("live-btn");
+    btn.href = LIVE_URL;
+    btn.style.display = "inline-block";
+    document.getElementById("live-note").style.display = "block";
+    document.getElementById("live-text").textContent = "The live app is running now. Open it and try an X-ray.";
+  }
+</script>
 
 </body>
 </html>
