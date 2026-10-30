@@ -403,4 +403,8 @@ with gr.Blocks(title="PneumoAI") as demo:
     sort_in.change(render_history, [search_in, sort_in, cur_user], hist_out)
     del_btn.click(delete_record, [del_id, search_in, sort_in, cur_user], hist_out)
 
-demo.launch(js=APP_JS, share=True)
+demo.launch(
+    server_name="0.0.0.0",
+    server_port=int(os.environ.get("PORT", 8080)),
+    js=APP_JS
+)
